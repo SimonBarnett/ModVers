@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<modver>
+  <module name="A Module">
+    <version number="1">      
+      <check type="table" name="ATABLE">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="form" name="AFORM">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="sql" db="system" name="select 1 from ..."/>
+    </version>
+    <version number="2">
+      <check type="table" name="ATABLE">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="form" name="AFORM">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="sql" db="user" name="select 1 from ..."/>
+    </version>    
+  </module>
+  <module name="B Module">
+    <version number="1">
+      <check type="table" name="ATABLE">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="form" name="AFORM">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="sql" db="system" name="select 1 from ..."/>
+    </version>
+    <version number="2">
+      <check type="table" name="ATABLE">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="form" name="AFORM">
+        <check name="ACOLUMN"/>
+        <check name="BCOLUMN"/>
+      </check>
+      <check type="sql" db="user" name="select 1 from ..."/>
+    </version>
+  </module>
+</modver>
