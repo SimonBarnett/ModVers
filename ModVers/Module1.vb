@@ -26,9 +26,11 @@ Module Module1
             Console.Write("Connecing to [{0}]...", db.ConnectionString)
             Using cn As New SqlConnection(db.ConnectionString)
                 Console.WriteLine("Ok.")
+
                 With mv
                     For Each m As modver.module In .moduleCollection
 
+                        ' Add the module to the dictionary
                         MVer.Add(m.name, 0)
 
                         Console.WriteLine("Verifying module [{0}].", m.name)
@@ -54,7 +56,7 @@ Module Module1
 
                                     Case "sql"
                                         Console.WriteLine("Check sql in [{0}] database.", ch.db)
-                                        Select Case ch.db
+                                        Select Case ch.db.ToLower
                                             Case "system"
                                                 Console.WriteLine("Execute sql: USE [{0}];{1}", ch.db, ch.name)
 
