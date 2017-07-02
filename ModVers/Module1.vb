@@ -12,6 +12,8 @@ Module Module1
 
         Try
 
+            Dim sql As SqlCommand = Nothing
+
             ' Find the local Priority sql database
             Dim db As ServerInstance = SearchInstance()
 
@@ -25,6 +27,7 @@ Module Module1
             ' Open the database
             Console.Write("Connecing to [{0}]...", db.ConnectionString)
             Using cn As New SqlConnection(db.ConnectionString)
+                cn.Open()
                 Console.WriteLine("Ok.")
 
                 With mv
@@ -42,15 +45,67 @@ Module Module1
                                 Select Case ch.type.ToLower
                                     Case "table"
                                         Console.WriteLine("Check TABLE [{0}].", ch.name)
+                                        sql = New SqlCommand(
+                                            String.Format(
+                                                "use [{0}]; " &
+                                                "select top 1 object_id from sys.tables where name = '{1}'",
+                                                PriorityEnviroments(0),
+                                                ch.name
+                                            ), cn
+                                        )
+                                        Dim result = sql.ExecuteScalar
+                                        If result Is Nothing Then
+                                            pass = False
+                                            Exit For
+                                        End If
+
                                         For Each col As modver.Column In ch.checkCollection
                                             Console.WriteLine("Check TABLE Column [{0}.{1}].", ch.name, col.name)
+                                            sql = New SqlCommand(
+                                                String.Format(
+                                                    "use [{0}]; " &
+                                                    "SELECT COUNT(*) FROM sys.all_columns WHERE oBject_id = {1} AND NAME = '{2}'",
+                                                    PriorityEnviroments(0),
+                                                    result,
+                                                    col.name
+                                                ), cn
+                                            )
+                                            If Not (sql.ExecuteScalar = 1) Then
+                                                pass = False
+                                                Exit For
+                                            End If
 
                                         Next
 
                                     Case "form"
                                         Console.WriteLine("Check FORM [{0}].", ch.name)
+                                        sql = New SqlCommand(
+                                            String.Format(
+                                                "use [system]; " &
+                                                "select T$EXEC from T$EXEC where TYPE = 'F' and ENAME = '{0}'",
+                                                ch.name
+                                            ), cn
+                                        )
+                                        Dim result = sql.ExecuteScalar
+                                        If result Is Nothing Then
+                                            pass = False
+                                            Exit For
+                                        End If
+
                                         For Each col As modver.Column In ch.checkCollection
                                             Console.WriteLine("Check FORM Column [{0}.{1}].", ch.name, col.name)
+                                            sql = New SqlCommand(
+                                                String.Format(
+                                                    "use [system]; " &
+                                                    "select count(*) from FORMCLMNS where FORM = {0} and NAME = '{1}'",
+                                                    result,
+                                                    col.name
+                                                ), cn
+                                            )
+                                            If Not (sql.ExecuteScalar = 1) Then
+                                                pass = False
+                                                Exit For
+                                            End If
 
                                         Next
 
