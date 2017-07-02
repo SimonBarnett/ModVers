@@ -15,9 +15,12 @@ Module wwwroot
                                 For Each virtual As VirtualDirectory In app.VirtualDirectories
                                     If virtual.Path = "/" Then
                                         Console.WriteLine("Ok.")
-                                        Console.WriteLine("Priority web found in [{0}].", virtual.PhysicalPath)
+
                                         Dim dr As New DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.System))
-                                        Return Replace(virtual.PhysicalPath, "%SystemDrive%\", dr.Root.FullName)
+                                        Dim ret As String = Replace(virtual.PhysicalPath, "%SystemDrive%\", dr.Root.FullName)
+                                        Console.WriteLine("Priority web found in [{0}].", ret)
+
+                                        Return RET
 
                                     End If
                                 Next

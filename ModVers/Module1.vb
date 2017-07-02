@@ -110,15 +110,44 @@ Module Module1
                                         Next
 
                                     Case "sql"
-                                        Console.WriteLine("Check sql in [{0}] database.", ch.db)
-                                        Select Case ch.db.ToLower
-                                            Case "system"
-                                                Console.WriteLine("Execute sql: USE [{0}];{1}", ch.db, ch.name)
+                                        Dim thisdb As String = "system"
+                                        If Not String.Compare(ch.db, "system", True) = 0 Then
+                                            thisdb = PriorityEnviroments(0)
+                                        End If
 
-                                            Case "user"
-                                                Console.WriteLine("Execute sql: USE [{0}];{1}", PriorityEnviroments(0), ch.name)
+                                        Console.WriteLine("Execute sql: USE [{0}];{1}", thisdb, ch.name)
+                                        sql = New SqlCommand(
+                                            String.Format(
+                                                "use [{0}]; {1}",
+                                                thisdb,
+                                                ch.name
+                                            ), cn
+                                        )
 
-                                        End Select
+                                        Try
+                                            Dim result = sql.ExecuteScalar
+                                            If result Is Nothing Then
+                                                pass = False
+                                                Exit For
+                                            End If
+
+                                            If Not (result = 1) Then
+                                                pass = False
+                                                Exit For
+                                            End If
+
+                                        Catch ex As Exception
+                                            Console.WriteLine(
+                                                String.Format(
+                                                    "SQL error: {0}.",
+                                                        ex.Message
+                                                  )
+                                              )
+                                            pass = False
+                                            Exit For
+
+                                        End Try
+
 
                                 End Select
 
