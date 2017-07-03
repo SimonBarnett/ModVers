@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<modver>
+  <module version="2" name="A Module" />
+  <module version="0" name="B Module" />
+</modver>

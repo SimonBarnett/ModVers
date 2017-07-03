@@ -3,7 +3,7 @@ Imports System.IO
 Imports System.Xml
 Imports System.Xml.Serialization
 
-Module Module1
+Module Main
 
     Private modverURL = "http://soti.medatechuk.com/client/modvers.xml"
     Private MVer As New Dictionary(Of String, Integer)
@@ -253,14 +253,18 @@ Module Module1
 
         Console.Write("Writing {0}...", fn.FullName)
         Using xr As XmlWriter = XmlWriter.Create(fn.FullName)
+
             xr.WriteStartDocument()
             xr.WriteStartElement("modver")
+
             For Each m As String In MVer.Keys
                 xr.WriteStartElement("module")
-                xr.WriteAttributeString("name", m.ToString)
                 xr.WriteAttributeString("version", MVer(m).ToString)
+                xr.WriteAttributeString("name", m.ToString)
                 xr.WriteEndElement()
+
             Next
+
             xr.WriteEndElement()
             xr.WriteEndDocument()
 

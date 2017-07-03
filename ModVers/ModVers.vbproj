@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{BE64396E-98E0-4E0A-B0EB-A60F662EC3A5}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <StartupObject>ModVers.Module1</StartupObject>
+    <StartupObject>ModVers.Main</StartupObject>
     <RootNamespace>ModVers</RootNamespace>
     <AssemblyName>ModVers</AssemblyName>
     <FileAlignment>512</FileAlignment>
@@ -82,7 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="dbConnections.vb" />
-    <Compile Include="Module1.vb" />
+    <Compile Include="Main.vb" />
     <Compile Include="modver.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -111,7 +111,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="example.xsd">
+    <None Include="Examples\example.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="My Project\app.manifest" />
@@ -128,7 +128,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="example.xml" />
+    <Content Include="Examples\example.xml" />
+    <Content Include="Examples\output.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
