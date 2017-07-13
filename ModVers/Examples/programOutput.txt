@@ -1,0 +1,25 @@
+﻿
+Locating SQL server...Ok.
+Found instance [Server=WALRUS\PRI;Trusted_Connection=True;].
+Locating Web server...Ok.
+Priority web found in [C:\inetpub\wwwroot].
+Load module info from http://soti.medatechuk.com/client/modvers.xml...Ok.
+Connecing to [Server=WALRUS\PRI;Trusted_Connection=True;]...Ok.
+Verifying module [A Module].
+Verifying version number [1].
+Check TABLE [CUSTOMERS].
+Check TABLE Column [CUSTOMERS.CUSTNAME].
+Check TABLE Column [CUSTOMERS.CUSTDES].
+Check FORM [CUSTOMERS].
+Check FORM Column [CUSTOMERS.OWNERLOGIN].
+Check FORM Column [CUSTOMERS.STATDES].
+Execute sql: USE [system];select 1
+Verifying version number [2].
+Check FORM [CUSTOMERS].
+Check FORM Column [CUSTOMERS.INACTIVEFLAG].
+Execute sql: USE [demo];select 1
+Verifying module [B Module].
+Verifying version number [1].
+Check TABLE [ATABLE].
+C:\inetpub\wwwroot\modver.xml exists. Deleting...Ok.
+Writing C:\inetpub\wwwroot\modver.xml...Ok.

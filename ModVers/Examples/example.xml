@@ -1,51 +1,47 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<!--This is hosted in the cloud, built from out module data -->
+<?xml version="1.0" encoding="UTF-8"?>
 <modver>
   <module name="A Module">
-    <version number="1">      
-      <check type="table" name="ATABLE">
-        <check name="ACOLUMN"/>
-        <check name="BCOLUMN"/>
+    <version number="1">
+      <check name="CUSTOMERS" type="table">
+        <check name="CUSTNAME"/>
+        <check name="CUSTDES"/>
       </check>
-      <check type="form" name="AFORM">
-        <check name="ACOLUMN"/>
-        <check name="BCOLUMN"/>
+      <check name="CUSTOMERS" type="form">
+        <check name="OWNERLOGIN"/>
+        <check name="STATDES"/>
       </check>
-      <check type="sql" db="system" name="select 1 from ..."/>
+      <check name="select 1" type="sql" db="system"/>
     </version>
     <version number="2">
-      <check type="table" name="ATABLE">
-        <check name="ACOLUMN"/>
-        <check name="BCOLUMN"/>
+      <check name="CUSTOMERS" type="form">
+        <check name="INACTIVEFLAG"/>
       </check>
-      <check type="form" name="AFORM">
-        <check name="ACOLUMN"/>
-        <check name="BCOLUMN"/>
-      </check>
-      <check type="sql" db="user" name="select 1 from ..."/>
-    </version>    
+      <check name="select 1" type="sql" db="user"/>
+    </version>
   </module>
   <module name="B Module">
     <version number="1">
-      <check type="table" name="ATABLE">
+      <check name="ATABLE" type="table">
         <check name="ACOLUMN"/>
         <check name="BCOLUMN"/>
       </check>
-      <check type="form" name="AFORM">
+      <check name="AFORM" type="form">
         <check name="ACOLUMN"/>
         <check name="BCOLUMN"/>
       </check>
-      <check type="sql" db="system" name="select 1 from ..."/>
+      <check name="select 1 from ..." type="sql" db="system"/>
     </version>
     <version number="2">
-      <check type="table" name="ATABLE">
+      <check name="ATABLE" type="table">
         <check name="ACOLUMN"/>
         <check name="BCOLUMN"/>
       </check>
-      <check type="form" name="AFORM">
+      <check name="AFORM" type="form">
         <check name="ACOLUMN"/>
         <check name="BCOLUMN"/>
       </check>
-      <check type="sql" db="user" name="select 1 from ..."/>
+      <check name="select 1 from ..." type="sql" db="user"/>
     </version>
   </module>
 </modver>
