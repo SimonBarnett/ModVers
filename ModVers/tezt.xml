@@ -1,0 +1,1110 @@
+<?xml version="1.0"?>
+<modver>
+  <module name="MOD-HOLIDAY">
+    <version number="0" name="Base Module">
+      <check type="Table" name="ZEMG_HOLGROUPS">
+        <check name="" />
+      </check>
+    </version>
+    <version number="4" name="Service Pack 4">
+      <check type="SQL" name="func">
+        <check name="ZEMG_HOLDATERANGE">
+          <sql>
+            /**********************************************************/
+            /* Read a given Users Start, End &amp; Break for a given Date */
+            /* */
+            /* INPUT: :i_USER = User ID */
+            /* :i_HOLDATE = Date to check */
+            /* */
+            /* OUTPUT: :o_FHR = Day From Hour */
+            /* :o_THR = Day To Hour */
+            /* :o_BRK = Day Break Time */
+            / **********************************************************/
+            :o_FHR = :o_THR = :o_BRK = 00:00;
+            :l_DAYNUM = DAY(:i_HOLDATE);
+            /* Initially see if any days defined for User */
+            :l_USERCNT = 0;
+            SELECT COUNT(*)
+            INTO :l_USERCNT
+            FROM USERTMTBL
+            WHERE USER = :i_USER;
+            /* Then see if this day defined for User */
+            SELECT STARTT, ENDT, ZEMG_BREAK
+            INTO :o_FHR, :o_THR, :o_BRK
+            FROM USERTMTBL
+            WHERE USER = :i_USER
+            AND WDAY = :l_DAYNUM;
+            GOTO 9900 WHERE :RETVAL &gt; 0;
+            /* Skip if User has days defined but not working this day! */
+            GOTO 9900 WHERE :RETVAL  0;
+            /* If none found use Company wide values */
+            SELECT STARTT, ENDT, ZEMG_BREAK
+            INTO :o_FHR, :o_THR, :o_BRK
+            FROM WORKPATTMTBL
+            WHERE WORKPAT = -2
+            AND WDAY = :l_DAYNUM;
+            GOTO 9900 WHERE :RETVAL &gt; 0;
+            /* If none found */
+            :o_FHR = 00:00;
+            :o_THR = 00:00;
+            :o_BRK = 00:00;
+            /**/
+            LABEL 9900;
+            /*
+            ** Override if Office is Closed
+            */
+            SELECT 00:00, 00:00, 00:00
+            INTO :o_FHR, :o_THR, :o_BRK
+            FROM OFFICECLOSED
+            WHERE CURDATE = :i_HOLDATE
+            AND CURDATE  01/01/88
+            AND NOT EXISTS /* But not if User ignores closed */
+            (SELECT 'X'
+            FROM USERSA
+            WHERE USERB = :i_USER
+            AND ZEMG_IGNORECLOSED = 'Y');
+            /**/
+            SELECT :i_USER, :i_HOLDATE, :l_DAYNUM, :o_FHR, :o_THR, :o_BRK
+            FROM DUMMY WHERE :i_HOLDEBUG = 1
+            FORMAT ADDTO '../../ZEMG_HOLDEBUG.TXT';
+            /**/
+          </sql>
+        </check>
+        <check name="ZEMG_HOLDATETIME">
+          <sql>
+            /**********************************************************/
+            /* Read a given Users Start, End &amp; Break for a given Date */
+            /* */
+            /* INPUT: :i_USER = User ID */
+            /* :i_HOLDATE = Date to check */
+            /* */
+            /* OUTPUT: :o_FHR = Day From Hour */
+            /* :o_THR = Day To Hour */
+            /* :o_BRK = Day Break Time */
+            / **********************************************************/
+            :o_FHR = :o_THR = :o_BRK = 00:00;
+            :l_DAYNUM = DAY(:i_HOLDATE);
+            /* Initially see if any days defined for User */
+            :l_USERCNT = 0;
+            SELECT COUNT(*)
+            INTO :l_USERCNT
+            FROM USERTMTBL
+            WHERE USER = :i_USER;
+            /* Then see if this day defined for User */
+            SELECT STARTT, ENDT, ZEMG_BREAK
+            INTO :o_FHR, :o_THR, :o_BRK
+            FROM USERTMTBL
+            WHERE USER = :i_USER
+            AND WDAY = :l_DAYNUM;
+            GOTO 9900 WHERE :RETVAL &gt; 0;
+            /* Skip if User has days defined but not working this day! */
+            GOTO 9900 WHERE :RETVAL  0;
+            /* If none found use Company wide values */
+            SELECT STARTT, ENDT, ZEMG_BREAK
+            INTO :o_FHR, :o_THR, :o_BRK
+            FROM WORKPATTMTBL
+            WHERE WORKPAT = -2
+            AND WDAY = :l_DAYNUM;
+            GOTO 9900 WHERE :RETVAL &gt; 0;
+            /* If none found */
+            :o_FHR = 00:00;
+            :o_THR = 00:00;
+            :o_BRK = 00:00;
+            /**/
+            LABEL 9900;
+            /*
+            ** Override if Office is Closed
+            */
+            SELECT 00:00, 00:00, 00:00
+            INTO :o_FHR, :o_THR, :o_BRK
+            FROM OFFICECLOSED
+            WHERE CURDATE = :i_HOLDATE
+            AND CURDATE  01/01/88
+            AND NOT EXISTS /* But not if User ignores closed */
+            (SELECT 'X'
+            FROM USERSA
+            WHERE USERB = :i_USER
+            AND ZEMG_IGNORECLOSED = 'Y');
+            /**/
+            SELECT :i_USER, :i_HOLDATE, :l_DAYNUM, :o_FHR, :o_THR, :o_BRK
+            FROM DUMMY WHERE :i_HOLDEBUG = 1
+            FORMAT ADDTO '../../ZEMG_HOLDEBUG.TXT';
+            /**/
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="5" name="Service Pack 5">
+      <check type="Table" name="ZEMG_HOLIDAY">
+        <check name="ONEOFFEXTRAS" />
+      </check>
+    </version>
+    <version number="6" name="Service Pack 6">
+      <check type="SQL" name="ZEMG_USERABSENT">
+        <check name="ZEMG_POST-INSERT3">
+          <sql>
+            :i_HOLDEBUG = 0;
+            SELECT SQL.DATE, :$.ZEMG_HOLIDAY
+            FROM DUMMY WHERE :i_HOLDEBUG =1
+            FORMAT '../../ZEMG_HOLDEBUG.TXT';
+            /* Insert/Update Extension Table */
+            #INCLUDE ZEMG_USERABSENT/ZEMG_BUF34
+            /* Calculate Period */
+            #INCLUDE ZEMG_USERABSENT/ZEMG_BUF32
+            /* Update Extra holiday */
+            UPDATE ZEMG_HOLIDAY
+            SET EXTRAHOLIDAYDAYS = EXTRAHOLIDAYDAYS + :o_HOLIDAYDAYS
+            WHERE USER = :$.USER
+            AND HYEAR = YEAR(:$.FROMDATE)
+            AND :$.ZEMG_EXTRAHOLIDAY = 'Y';
+            /* Update Holiday taken */
+            UPDATE ZEMG_HOLIDAY
+            SET HOLIDAYUSEDDAYS = HOLIDAYUSEDDAYS + :o_HOLIDAYDAYS
+            WHERE USER = :$.USER
+            AND HYEAR = YEAR(:$.FROMDATE)
+            AND :$.ZEMG_HOLIDAY = 'Y';
+            /* Update holiday left */
+            UPDATE ZEMG_HOLIDAY
+            SET HOLIDAYLEFTDAYS =
+            HOLIDAYDAYS + EXTRAHOLIDAYDAYS - HOLIDAYCFWDDAYS - HOLIDAYUSEDDAYS
+            WHERE USER = :$.USER
+            AND HYEAR = YEAR(:$.FROMDATE);
+            /**/
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="7" name="Service Pack 7 - Awaiting Information" />
+    <version number="8" name="Service Pack 8">
+      <check type="Table" name="USERSA">
+        <check name="ZEMG_IGNORECLOSED" />
+      </check>
+    </version>
+    <version number="9" name="Service Pack 9">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:statustype = 'ZEMG_HOLS';</sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-ALLOCRES">
+    <version number="0" name="Base Revision">
+      <check type="SQL" name="DOCUMENTS_P">
+        <check name="ZEMG_POST-UPDATE1">
+          <sql />
+        </check>
+      </check>
+      <check type="Table" name="CUSTOMERS">
+        <check name="ZEMG_GRVHOLDFLAG" />
+      </check>
+      <check type="Table" name="ORDERITEMS">
+        <check name="ZEMG_QTYAVAILABLE" />
+        <check name="ZEMG_QTYRESAVAILABLE" />
+        <check name="ZEMG_QTYRESERVED" />
+        <check name="ZEMG_DONOTAUTOPACK" />
+      </check>
+      <check type="Table" name="WAREHOUSES">
+        <check name="ZEMG_ISSUELOC" />
+      </check>
+    </version>
+    <version number="1" name="Revision 1 - check only on status change">
+      <check type="SQL" name="DOCUMENTS_P">
+        <check name="">
+          <sql>
+            SELECT              COUNT(*) AS MatchingFROM                   dbo.FORMTRIGTEXT       INNER JOIN dbo.TRIGGERS ON dbo.FORMTRIGTEXT.TRIG = dbo.TRIGGERS.TRIG       INNER JOIN dbo.T$EXEC ON dbo.FORMTRIGTEXT.FORM = dbo.T$EXEC.T$EXECWHERE 0=0       and (dbo.T$EXEC.ENAME = N'DOCUMENTS_P')       AND (dbo.TRIGGERS.TRIGNAME = N'ZEMG_POST-UPDATE1')      AND (dbo.FORMTRIGTEXT.TEXT LIKE N'%GOTO 8010 WHERE :l_FINALCNT &gt; 1 %')
+          </sql>
+        </check>
+        <check name="">
+          <sql>
+            SELECT              COUNT(*) AS MatchingFROM                   dbo.FORMTRIGTEXT       INNER JOIN dbo.TRIGGERS ON dbo.FORMTRIGTEXT.TRIG = dbo.TRIGGERS.TRIG       INNER JOIN dbo.T$EXEC ON dbo.FORMTRIGTEXT.FORM = dbo.T$EXEC.T$EXECWHERE 0=0       and (dbo.T$EXEC.ENAME = N'DOCUMENTS_P')       AND (dbo.TRIGGERS.TRIGNAME = N'ZEMG_POST-UPDATE1')      AND (dbo.FORMTRIGTEXT.TEXT LIKE N'%GOTO 8010 WHERE :l_FINALCNT &gt; 1 %')
+          </sql>
+        </check>
+      </check>
+      <check type="SQL" name="DOCUMENTS_P">
+        <check name="">
+          <sql>
+            SELECT                COUNT(*) AS Matching FROM                     dbo.FORMTRIGTEXT         INNER JOIN dbo.TRIGGERS ON dbo.FORMTRIGTEXT.TRIG = dbo.TRIGGERS.TRIG         INNER JOIN dbo.T$EXEC ON dbo.FORMTRIGTEXT.FORM = dbo.T$EXEC.T$EXEC WHERE 0=0        and (dbo.T$EXEC.ENAME = N'DOCUMENTS_P')         AND (dbo.TRIGGERS.TRIGNAME = N'ZEMG_POST-UPDATE1')         AND (dbo.FORMTRIGTEXT.TEXT LIKE N'%GOTO 8000 WHERE :$.STATDES = :$1.STATDES;%')
+          </sql>
+        </check>
+        <check name="">
+          <sql>
+            SELECT                COUNT(*) AS Matching FROM                     dbo.FORMTRIGTEXT         INNER JOIN dbo.TRIGGERS ON dbo.FORMTRIGTEXT.TRIG = dbo.TRIGGERS.TRIG         INNER JOIN dbo.T$EXEC ON dbo.FORMTRIGTEXT.FORM = dbo.T$EXEC.T$EXEC WHERE 0=0        and (dbo.T$EXEC.ENAME = N'DOCUMENTS_P')         AND (dbo.TRIGGERS.TRIGNAME = N'ZEMG_POST-UPDATE1')         AND (dbo.FORMTRIGTEXT.TEXT LIKE N'%GOTO 8000 WHERE :$.STATDES = :$1.STATDES;%')
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="2" name="Version 16 Amendments for Ord Stat Flags">
+      <check type="Table" name="ORDSTATUS">
+        <check name="ZEMG_ALLOCRESFLAG" />
+        <check name="ZEMG_MRPFLAG" />
+      </check>
+    </version>
+    <version number="3" name="Service Pack 3 - Improvements">
+      <check type="Table" name="ORDERITEMS">
+        <check name="ZEMG_DONOTAUTOPACK" />
+      </check>
+      <check type="Table" name="ORDERITEMSA">
+        <check name="ZEMG_NOTICEFLAG" />
+      </check>
+      <check type="Table" name="PORDERITEMSA">
+        <check name="PORDERITEMSA" />
+      </check>
+      <check type="Table" name="PORDERS">
+        <check name="ZEMG_RESERVABLEFLAG" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-BOMAVAIL">
+    <version number="0" name="Base Revision">
+      <check type="Table" name="ZEMG_BOMAVAIL">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-AUTOATTACH">
+    <version number="0" name="Base Installation">
+      <check type="Form" name="PARTEXTFILE">
+        <check name="ZEMG_ATTACHTOQU" />
+        <check name="ZEMG_ATTACHTOSO" />
+        <check name="ZEMG_ATTACHTOSH" />
+        <check name="ZEMG_ATTACHTOECO" />
+        <check name="ZEMG_ATTACHTOWO" />
+        <check name="ZEMG_ATTACHTORFQ" />
+        <check name="ZEMG_ATTACHTOPD" />
+        <check name="ZEMG_ATTACHTOVQ" />
+        <check name="ZEMG_ATTACHTOPO" />
+      </check>
+      <check type="Form" name="ZEMG_OPENINV">
+        <check name="" />
+      </check>
+      <check type="Form" name="ZEMG_PREPINVOICE">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-USERTXTMAIL">
+    <version number="0" name="Base Revision">
+      <check type="Table" name="ZEMG_USERSTEXT">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-LOGCHANGES">
+    <version number="0" name="Base Installation">
+      <check type="Table" name="MED_MODULES">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-PARTFLAGMRP">
+    <version number="0" name="Base Module">
+      <check type="Table" name="PART">
+        <check name="ZEMG_FLAGMRP" />
+      </check>
+    </version>
+    <version number="1" name="Service Pack 1">
+      <check type="Table" name="ORDSTATUS">
+        <check name="ZEMG_ALLOCRESFLAG" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-REPORTPROD">
+    <version number="0" name="Base Version">
+      <check type="Table" name="SERACT">
+        <check name="ZEMG_GOODSREPORTED" />
+        <check name="ZEMG_REJECTREPORTED" />
+        <check name="ZEMG_MRBREPORTED" />
+      </check>
+    </version>
+    <version number="1" name="Rev1 - Ignore some parts">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            /****************************************
+            ** Check Stock when Reporting Production
+            *****************************************/
+            : l_ZEMG_STKAVOK = :l_ZEMG_ISSUEDOK = 'Y';
+            :l_ZEMG_STKAVCNT = :l_ZEMG_ISSUEDCNT = 0;
+            :PAR1 = :PAR2 = '';
+            /*
+            ** Check Constant
+            */
+            :i_CPYNAME = '';
+            :i_CPYNAME = 'CHKSTKREPPRD';
+            #INCLUDE func/ZEMG_CPYCONST
+            GOTO 1313 WHERE :o_ICPYVALUE = 0;
+            /*
+            ** Declare Cursor for each unique part in Kit, only
+            ** items to issue to kit and inventory controlled.
+            */
+            DECLARE @ZEMG_CHECK_KIT CURSOR FOR
+            SELECT KITITEMS.PART,
+            SUM(INTQUANT((REALQUANT(QUANT) / REALQUANT(:$.SERQUANT)) *
+            REALQUANT(:$.TQUANT + :$.TSQUANT + :$.TMQUANT)))
+            FROM KITITEMS, PARTPARAM
+            WHERE KITITEMS.SERIAL = :$.SERIAL
+            AND KITITEMS.ACT = :$.ACT
+            AND KITITEMS.KITFLAG = 'Y'
+            AND PARTPARAM.PART = KITITEMS.PART
+            AND PARTPARAM.INVFLAG = 'Y'
+            AND KITITEMS.KITI  0
+            GROUP BY 1;
+            /* Open cursor */
+            OPEN @ZEMG_CHECK_KIT;
+            GOTO 1313 WHERE :RETVAL  'Y';
+            /**/
+            SELECT 'N'
+            INTO :l_ZEMG_STKAVOK
+            FROM DUMMY
+            WHERE :l_ZEMG_QTYAVAIL  0;
+            /*
+            ** Balance issued should match? NOT YET USED!!!
+            */
+            :l_ZEMG_BALISSUED = 0;
+            SELECT SUM(BALANCE)
+            INTO :l_ZEMG_BALISSUED
+            FROM WARHSBAL, CUSTOMERS
+            WHERE WARHS = :$.WARHS
+            AND PART = :l_ZEMG_PART
+            AND SERIAL = :$.SERIAL
+            AND ACT = :$.ACT
+            AND CUSTOMERS.CUST = WARHSBAL.CUST
+            AND CUSTOMERS.STATUSFLAG = 'Y'
+            AND CUSTOMERS.LABFLAG  'Y';
+            /**/
+            SELECT 'N'
+            INTO :l_ZEMG_ISSUEDOK
+            FROM DUMMY
+            WHERE :l_ZEMG_QTYISSUED
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="2" name="Rev2 - New Constant, Check kit">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            /* Reporting Production Module Values */
+            SELECT 4 INTO :ECHOOSE FROM DUMMY WHERE :$.NAME = 'CHKSTKREPPRD';
+            SELECT 2 INTO :ECHOOSE FROM DUMMY WHERE :$.NAME = 'CHKPREVOPQTY';
+          </sql>
+        </check>
+        <check name="">
+          <sql>
+            /* Reporting Production Module Values */
+            SELECT 4 INTO :ECHOOSE FROM DUMMY WHERE :$.NAME = 'CHKSTKREPPRD';
+            SELECT 2 INTO :ECHOOSE FROM DUMMY WHERE :$.NAME = 'CHKPREVOPQTY';
+          </sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-REPLACEBOM">
+    <version number="0" name="Base Installation">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            ** Copy Change and Replace Part in BOM,
+            ** Check if within the ZEMG_REPLACEBOM procedure and
+            ** find new part created
+          </sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-PRTAVGUSAGE">
+    <version number="0" name="Base Module">
+      <check type="Table" name="DOCTYPES">
+        <check name="ZEMG_INCINUSAGE" />
+      </check>
+      <check type="Table" name="ZEMG_AVGUSEDETAILS">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-ESTIMATION">
+    <version number="0" name="Base Module">
+      <check type="Table" name="CPROF">
+        <check name="ZEMG_ESTFLAG" />
+      </check>
+      <check type="Table" name="CPROFITEMS">
+        <check name="ZEMG_PARTLOADNAME" />
+        <check name="ZEMG_ESTPURPRICE" />
+      </check>
+      <check type="Table" name="ZEMG_PARTBOMLOAD">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_PROFIACT">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_PROFITREE">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_ROUTLOAD">
+        <check name="" />
+      </check>
+    </version>
+    <version number="1" name="Service Pack 1 - Awaiting Information">
+      <check type="Table" name="PART">
+        <check name="ZEMG_ESTFLAG" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-SHIPCURRINV">
+    <version number="0" name="Base Module">
+      <check type="Table" name="DOCTYPES">
+        <check name="ZEMG_SHIPDOCFLAG" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-CERTITAX">
+    <version number="0" name="Base Version">
+      <check type="Table" name="TAXES">
+        <check name="ZEMG_STATE" />
+        <check name="ZEMG_ZIP" />
+      </check>
+      <check type="Table" name="ZEMG_LOADVAT">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-AUTOEMAIL">
+    <version number="0" name="Base Revsion">
+      <check type="Table" name="ZEMG_AUTO_DOCUMENTS">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_AUTO_DOC_DELV">
+        <check name="" />
+      </check>
+    </version>
+    <version number="1" name="Revision 1">
+      <check type="Table" name="ZEMG_AUTO_DOCUMENTS">
+        <check name="SELECTTYPE" />
+      </check>
+    </version>
+    <version number="2" name="Revision 2">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            --Procedure text
+            SELECT
+            COUNT(*) AS Matching
+            FROM
+            dbo.PROGRAMSTEXT
+            INNER JOIN dbo.PROGRAMS ON dbo.PROGRAMSTEXT.PROG = dbo.PROGRAMS.PROG
+            INNER JOIN dbo.T$EXEC ON dbo.PROGRAMS.EXEC = dbo.T$EXEC.T$EXEC
+            WHERE 0=0
+            and (dbo.T$EXEC.ENAME = N'ZEMG_SEND_AGEDEBT')
+            AND (dbo.$EXEC.TYPE = 'P')
+            AND (dbo.PROGRAMS.POS &gt; 0)
+            AND (dbo.PROGRAMSTEXT.TEXTLINE &gt; 0)
+            AND (dbo.PROGRAMSTEXT.TEXT LIKE N'%AND GL  -1 AND GL  -2))%')
+          </sql>
+        </check>
+        <check name="">
+          <sql>
+            --Procedure text
+            SELECT
+            COUNT(*) AS Matching
+            FROM
+            dbo.PROGRAMSTEXT
+            INNER JOIN dbo.PROGRAMS ON dbo.PROGRAMSTEXT.PROG = dbo.PROGRAMS.PROG
+            INNER JOIN dbo.T$EXEC ON dbo.PROGRAMS.EXEC = dbo.T$EXEC.T$EXEC
+            WHERE 0=0
+            and (dbo.T$EXEC.ENAME = N'ZEMG_SEND_AGEDEBT')
+            AND (dbo.$EXEC.TYPE = 'P')
+            AND (dbo.PROGRAMS.POS &gt; 0)
+            AND (dbo.PROGRAMSTEXT.TEXTLINE &gt; 0)
+            AND (dbo.PROGRAMSTEXT.TEXT LIKE N'%AND GL  -1 AND GL  -2))%')
+          </sql>
+        </check>
+        <check name="">
+          <sql>
+            --Procedure text
+            SELECT
+            COUNT(*) AS Matching
+            FROM
+            dbo.PROGRAMSTEXT
+            INNER JOIN dbo.PROGRAMS ON dbo.PROGRAMSTEXT.PROG = dbo.PROGRAMS.PROG
+            INNER JOIN dbo.T$EXEC ON dbo.PROGRAMS.EXEC = dbo.T$EXEC.T$EXEC
+            WHERE 0=0
+            and (dbo.T$EXEC.ENAME = N'ZEMG_SEND_AGEDEBT')
+            AND (dbo.$EXEC.TYPE = 'P')
+            AND (dbo.PROGRAMS.POS &gt; 0)
+            AND (dbo.PROGRAMSTEXT.TEXTLINE &gt; 0)
+            AND (dbo.PROGRAMSTEXT.TEXT LIKE N'%AND GL  -1 AND GL  -2))%')
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="3" name="Revision 3">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            --Procedure name
+            SELECT
+            COUNT(*) AS Matching
+            FROM
+            dbo.EXEC
+
+            WHERE 0=0
+            AND (dbo.EXEC.ENAME = N'ZEMG_SEND_TINVOICES')
+            AND (dbo.EXEC.TYPE = 'P')
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="4" name="Revision 4">
+      <check type="Table" name="ZEMG_AUTO_DOCUMENTS">
+        <check name="PDFEXEC" />
+        <check name="PDFPRINTFORMAT" />
+      </check>
+    </version>
+    <version number="5" name="Revision 5">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>AND NAME = 'FL';</sql>
+        </check>
+        <check name="">
+          <sql>AND NAME = 'FL';</sql>
+        </check>
+        <check name="">
+          <sql>AND NAME = 'FL';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="6" name="Revision 6">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>ERRMSG 1 WHERE :$.@ NOT BETWEEN :SCHOOSE AND :ECHOOSE;</sql>
+        </check>
+        <check name="">
+          <sql>ERRMSG 1 WHERE :$.@ NOT BETWEEN :SCHOOSE AND :ECHOOSE;</sql>
+        </check>
+      </check>
+    </version>
+    <version number="7" name="Revision 7">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:i_DOCCODE = 'RM1';</sql>
+        </check>
+        <check name="">
+          <sql>:i_DOCCODE = 'RM1';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="8" name="Revision 8">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>WRNMSG 25000 WHERE :$.CUST  0</sql>
+        </check>
+        <check name="">
+          <sql>WRNMSG 25000 WHERE :$.CUST  0</sql>
+        </check>
+        <check name="">
+          <sql>WRNMSG 25000 WHERE :$.CUST  0</sql>
+        </check>
+      </check>
+    </version>
+    <version number="9" name="Revision 9">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>WRNMSG 802 WHERE :i_INPNUM = 1 AND :l_DOCNAME NOT LIKE 'Z___\_%';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="10" name="Rev10 - Add Delete all queue procedure">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>FETCH DELETE_CUR INTO :l_DOCQUEUE, :l_FILEPATH, :l_FILENAME;</sql>
+        </check>
+        <check name="">
+          <sql>FETCH DELETE_CUR INTO :l_DOCQUEUE, :l_FILEPATH, :l_FILENAME;</sql>
+        </check>
+        <check name="">
+          <sql>FETCH DELETE_CUR INTO :l_DOCQUEUE, :l_FILEPATH, :l_FILENAME;</sql>
+        </check>
+        <check name="">
+          <sql>FETCH DELETE_CUR INTO :l_DOCQUEUE, :l_FILEPATH, :l_FILENAME;</sql>
+        </check>
+      </check>
+    </version>
+    <version number="11" name="Rev11 - Clear the temp folder">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>DECLARE @ZEMG_AUTO_FILE_CUR CURSOR FOR</sql>
+        </check>
+        <check name="">
+          <sql>DECLARE @ZEMG_AUTO_FILE_CUR CURSOR FOR</sql>
+        </check>
+        <check name="">
+          <sql>DECLARE @ZEMG_AUTO_FILE_CUR CURSOR FOR</sql>
+        </check>
+      </check>
+    </version>
+    <version number="12" name="Rev12 - Check for hosted system">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>WHERE NAME = 'HOSTEDSYS'</sql>
+        </check>
+      </check>
+    </version>
+    <version number="13" name="Rev13 - Addition of Packing Slips">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:i_DOCCODE = 'CR1';</sql>
+        </check>
+        <check name="">
+          <sql>:i_DOCCODE = 'CR1';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="14" name="Rev14 - Check Inactive Contact">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>ERRMSG 25000 WHERE :$.CUST  0AND EXISTS(SELECT 'X'FROM ZEMG_AUTO_DOC_DELVWHERE CUST = :$.CUSTAND PHONEBOOK = :$.PHONE)AND EXISTS(SELECT 'X'FROM PHONEBSTATSWHERE STATDES = :$.@AND INACTIVEFLAG = 'Y');</sql>
+        </check>
+      </check>
+    </version>
+    <version number="15" name="Rev15 - Restrict Filename Length">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql> ** Make Filename with date/time and file number if required and** Batch ID with date/time and ensure is 40 characters long so</sql>
+        </check>
+        <check name="">
+          <sql> ** Make Filename with date/time and file number if required and** Batch ID with date/time and ensure is 40 characters long so</sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-EXPBANKPAY_BACS">
+    <version number="0" name="Base Revision">
+      <check type="Table" name="ZEMG_BACSCHAR">
+        <check name="" />
+      </check>
+    </version>
+    <version number="1" name="Compatible with Rich">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:$.FLM = :$.FIL;</sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-MALFENHANCE">
+    <version number="0" name="Base Module">
+      <check type="Table" name="FAULTS">
+        <check name="ZEMG_CUST" />
+        <check name="ZEMG_CUSTPHONE" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-REPEATTASKS">
+    <version number="0" name="Base Module">
+      <check type="Table" name="CUSTNOTES">
+        <check name="ZEMG_REPEATINGTASK" />
+      </check>
+      <check type="Table" name="ZEMG_LOADCUSTNOTESA">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_REPEATINGTASKS">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-PSBYDUEDATE">
+    <version number="0" name="Base Revision">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            /*
+            ** Ensure Lines not populated from order when
+            ** creating packing slip by due date.
+            */
+            SELECT 2 INTO :AUTOFINDORD
+            FROM DUMMY
+            WHERE :FORM_INTERFACE_NAME = 'ZEMG_OPENPSBYDUEDATE';
+          </sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-ROYALMAILPC">
+    <version number="0" name="Base Version">
+      <check type="Table" name="USERPRIV">
+        <check name="ZEMG_USER" />
+        <check name="ZEMG_ROYALMAIL" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-FLEETMAN">
+    <version number="0" name="Base Revision">
+      <check type="Table" name="ZEMG_VEHICLES">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_VMANUFACTURERS">
+        <check name="" />
+      </check>
+    </version>
+    <version number="1" name="Rev1 - Only update units for hrs or mile">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>GOTO 800 WHERE :$.SERVREP  'S' OR :$.SERVICEUNIT = 0 OR:$.SERVICEUNIT  :$$$.LASTUNITSUNIT OR :$.SERVREPENDDATE = 01/01/88OR :$.SERVREPUNITS = 0 OR :$.SERVREPENDDATE</sql>
+        </check>
+      </check>
+    </version>
+    <version number="2" name="Rev2">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>** Removed 08/04/13 as first service already occurred no** initial period is valid to add on!!</sql>
+        </check>
+      </check>
+    </version>
+    <version number="3" name="Rev3 - CALENDAR FOR SERVICE DATES">
+      <check type="Table" name="ZEMG_VEHICLECALDEF">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_VEHSERVTYPESCAL">
+        <check name="" />
+      </check>
+    </version>
+    <version number="4" name="Rev4 - Driver Exceptions">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:$.TODATEKEY = (:$.@ = 01/01/88 ? 31/12/80 : :$.@);</sql>
+        </check>
+      </check>
+    </version>
+    <version number="5" name="Rev5 - Show/Hide Inactive Vehicles">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            :ACTIVATE_POST_FORM = 'Y';
+            /*
+            ** Show Inactive Vehicles?
+            */
+            :SHOWINACTIVE = 0;
+            :i_CPYNAME = 'SHOWFLEET';
+            #INCLUDE func/ZEMG_CPYCONST
+            :SHOWINACTIVE = :o_ICPYVALUE;
+          </sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-ENT_SCAN">
+    <version number="0" name="Base Revision">
+      <check type="Table" name="ZEMG_SCANNINGLOG">
+        <check name="" />
+      </check>
+    </version>
+    <version number="1" name="Rev1-Removes Need for Pixie">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql> SELECT VALUEINTO :l_SCANPROGFROM NETDEFSWHERE NAME = 'SCAN_1_PROG' AND SERVER = 'SCAN_DOCUMENTS';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="2" name="Rev2-update to executable">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>INTO :o_MSG107</sql>
+        </check>
+      </check>
+    </version>
+    <version number="3" name="Rev3 - support incoming auto doc">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>GOSUB 900 WHERE :l_BATCH1 = 'D';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="4" name="Rev4 - Multi User and Page Numeration">
+      <check type="Table" name="ZEMG_SCANNINGBID">
+        <check name="" />
+      </check>
+    </version>
+    <version number="5" name="Rev5 - Check file exists for Rich IF">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>SELECT STRCAT(VALUE,:l_SLASH , SQL.ENV)34 34 INTO :l_SCAN_DOC_PRI_DIRFROM NETDEFSWHERE NAME = 'SCAN_DOC_PRI_DIR'AND SERVER = 'SCAN_DOCUMENTS'</sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-FACMODMIG">
+    <version number="0" name="Base Module">
+      <check type="Table" name="ZEMG_LOADWORKCMIG">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-MANDCUSTPO">
+    <version number="0" name="Base Version">
+      <check type="Table" name="CUSTOMERS">
+        <check name="ZEMG_MAND_CUST_PO" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-PDFCONVERT">
+    <version number="0" name="Base Version">
+      <check type="Table" name="ZEMG_AUTO_DOCUMENTS">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_PROCESS_DOCS">
+        <check name="" />
+      </check>
+    </version>
+    <version number="1" name="New settings">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>SELECT :$.@INTO :$.DOCEXECFROM DUMMYWHERE :$.DOCEXEC = 0;</sql>
+        </check>
+      </check>
+    </version>
+    <version number="2" name="Rich Compatibility">
+      <check type="Table" name="ZEMG_USER_BATCHCMD">
+        <check name="" />
+      </check>
+    </version>
+    <version number="3" name="V16, Enhancements for PDF layouts">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            / ************************************************************* ****/
+            /* Emerge PDF Conversion: */
+            /* Store the Input Option. For use in Procedure INPUT Step Query */
+            /* */
+            /* INPUT: :i_DOCCODE = Auto Document Code */
+            /* :i_SRT = Sort Value to Store */
+            /* :i_SRTLBL = Sort Label to Store */
+            /* */
+            /* OUTPUT: Stored USERGANTTLASTS record for current User and */
+            /* and Procedure ('$'), NAME = :i_SRTLBL */
+            /* */
+            / ************************************************************* ****/
+            :l_PDFEXEC = 0;
+            SELECT PDFEXEC
+            INTO :l_PDFEXEC
+            FROM ZEMG_AUTO_DOCUMENTS
+            WHERE ZEMG_AUTO_DOCUMENTS.AUTO_DOC_CODE = :i_DOCCODE
+            AND ZEMG_AUTO_DOCUMENTS.AUTO_DOCUMENT  0;
+            GOTO 55000 WHERE :RETVAL
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="4" name="Sort Parameter Issue">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>(:$.SRT =1 OR UGL1.VALUE = 1 ? INVOICES.IVNUM :</sql>
+        </check>
+      </check>
+    </version>
+    <version number="5" name="Addition of Print formats">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql> ZEMG_AUTO_DOCUMENTS.PRINTFORMAT)</sql>
+        </check>
+        <check name="">
+          <sql> ZEMG_AUTO_DOCUMENTS.PRINTFORMAT)</sql>
+        </check>
+      </check>
+    </version>
+    <version number="6" name="Sizing % changes">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>ITOA(ROUND(1200.00 * ((0.0 + :l_SCALEPCENT) / 100.00))) : '')</sql>
+        </check>
+      </check>
+    </version>
+    <version number="7" name="Move compnay data to ZEMG table">
+      <check type="Table" name="ZEMG_COMP_FOOTER">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_COMP_FOOTER_TAG">
+        <check name="" />
+      </check>
+    </version>
+    <version number="8" name="Add PS and CR wrappers">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:i_DOCCODE = 'DN1';</sql>
+        </check>
+        <check name="">
+          <sql>:i_DOCCODE = 'DN1';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="9" name="Filename incl date added">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>
+            SELECT STRCAT(:l_PDFFRONT,
+            (:l_FILENUM = 0 ? '' : ITOA(:l_FILENUM)), '.htm')STRCAT(:l_PDFFRONT,(:l_FILENUM = 0 ? '' : ITOA(:l_FILENUM)), '.pdf')INTO :o_HTMFILENAME, :o_PDFFILENAMEFROM DUMMY;:l_FILENUM = :l_FILENUM + 1;
+          </sql>
+        </check>
+        <check name="">
+          <sql>
+            SELECT STRCAT(:l_PDFFRONT,
+            (:l_FILENUM = 0 ? '' : ITOA(:l_FILENUM)), '.htm')STRCAT(:l_PDFFRONT,(:l_FILENUM = 0 ? '' : ITOA(:l_FILENUM)), '.pdf')INTO :o_HTMFILENAME, :o_PDFFILENAMEFROM DUMMY;:l_FILENUM = :l_FILENUM + 1;
+          </sql>
+        </check>
+        <check name="">
+          <sql>
+            SELECT STRCAT(:l_PDFFRONT,
+            (:l_FILENUM = 0 ? '' : ITOA(:l_FILENUM)), '.htm')STRCAT(:l_PDFFRONT,(:l_FILENUM = 0 ? '' : ITOA(:l_FILENUM)), '.pdf')INTO :o_HTMFILENAME, :o_PDFFILENAMEFROM DUMMY;:l_FILENUM = :l_FILENUM + 1;
+          </sql>
+        </check>
+      </check>
+    </version>
+    <version number="10" name="Rich (save file in tmp url)">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>/* CL ADD 12-04-17 *//* RICH FILE PATH */SELECT STRCAT(VALUE, :l_PDFEND,(:l_FILENUM = 0 ? '' : ITOA(:l_FILENUM)),'.PDF')INTO :o_PDFURLFROM NETDEFSWHERE SERVER = 'PDF_CONVERSION'AND NAME = 'CONV_TMPURL';/* END CL ADD 12-04-17 */</sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-SUPQUALITY">
+    <version number="0" name="Base Module">
+      <check type="Table" name="ZEMG_QUALITYCLASS">
+        <check name="" />
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_QUALITYDOC">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-PPAP8D5WHY">
+    <version number="0" name="Base Version">
+      <check type="Table" name="ZEMG_PPAPREASONS">
+        <check name="" />
+      </check>
+    </version>
+    <version number="1" name="PDF module support">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>LINK ZEMG_PPAP TO :l_LINK;</sql>
+        </check>
+      </check>
+    </version>
+    <version number="2" name="Set up default BPM's">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>The service pack is to check that data exists in the BPM. This can only be checked manually..</sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-MRPFLAGONFS">
+    <version number="0" name="Base Module">
+      <check type="Table" name="PART">
+        <check name="ZEMG_FLAGMRP" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-ROYALMA-USE">
+    <version number="0" name="Base Module">
+      <check type="Table" name="ZEMG_POSTCODES">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_RMX">
+        <check name="" />
+      </check>
+      <check type="Table" name="ZEMG_USERSB">
+        <check name="" />
+        <check name="ROYALMAILFLAG" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-WOKITSCRAP">
+    <version number="0" name="Base Module">
+      <check type="Table" name="GENERALLOAD_T">
+        <check name="ZEMG_PART_SCRAP" />
+      </check>
+      <check type="Table" name="LOADPARTMIGRATION">
+        <check name="ZEMG_PART_SCRAP" />
+      </check>
+      <check type="Table" name="PART">
+        <check name="ZEMG_KITSCRAP" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-POGRVNOTIFY">
+    <version number="0" name="Base Module">
+      <check type="Table" name="ORDERITEMSA">
+        <check name="ZEMG_NOTICEFLAG" />
+      </check>
+      <check type="Table" name="PORDERITEMSA">
+        <check name="ZEMG_NOTICEFLAG" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-REPJRNAL">
+    <version number="0" name="Base Revision">
+      <check type="Table" name="FNCTRANS">
+        <check name="ZEMG_RECURRING_FLAG" />
+        <check name="ZEMG_REPEATINGJRNAL" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-BULKDISPREJ">
+    <version number="0" name="Base Installation Module">
+      <check type="Table" name="ALINE">
+        <check name="ZEMG_INVDISPREJDOC" />
+        <check name="ZEMG_INVDISPREJTRANS" />
+        <check name="ZEMG_INVDISPREJDOC" />
+        <check name="ZEMG_INVDISPREJTRANS" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-CYCLECOUNT">
+    <version number="0" name="Base Version">
+      <check type="Table" name="ZEMG_CYCLECOUNT">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-QA_MODULE">
+    <version number="0" name="Base Module">
+      <check type="Table" name="MED_ACTEXTFILES">
+        <check name="" />
+      </check>
+      <check type="Table" name="MED_FTRIGREV">
+        <check name="" />
+      </check>
+      <check type="Table" name="MED_FTRIGREVTEXT">
+        <check name="" />
+      </check>
+    </version>
+  </module>
+  <module name="MOD-SHIPPRICES">
+    <version number="0" name="Base Revision">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:i_CPYNAME = 'SSHIPPINGPR';</sql>
+        </check>
+      </check>
+    </version>
+    <version number="1" name="Rev1 - Added to quotes too">
+      <check type="SQL" name="SQL">
+        <check name="">
+          <sql>:i_CPYNAME = 'SSHIPPINGPQ';</sql>
+        </check>
+      </check>
+    </version>
+  </module>
+  <module name="MOD-BARCODE-EAN13">
+    <version number="0" name="Base Version">
+      <check type="Table" name="PARTPARAMA">
+        <check name="ZEMG_EAN13" />
+      </check>
+      <check type="Table" name="ZEMG_EAN13">
+        <check name="DIGIT1" />
+      </check>
+    </version>
+  </module>
+</modver>

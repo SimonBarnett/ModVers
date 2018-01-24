@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
-    <OutputPath>c:\</OutputPath>
+    <OutputPath>debug\</OutputPath>
     <DocumentationFile>ModVers.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
@@ -81,6 +81,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clArg.vb" />
     <Compile Include="dbConnections.vb" />
     <Compile Include="Main.vb" />
     <Compile Include="modver.vb" />
@@ -111,7 +112,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Examples\example.xsd">
+    <None Include="example.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Include="My Project\app.manifest" />
@@ -128,9 +129,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Examples\example.xml" />
-    <Content Include="Examples\output.xml" />
-    <Content Include="Examples\programOutput.txt" />
+    <None Include="Resources\Syntax.txt" />
+    <Content Include="tezt.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,12 @@ Imports Microsoft.Web.Administration
 
 Module wwwroot
 
+    Private Function outfile() As FileInfo
+
+        Return New FileInfo(IO.Path.Combine(rootPath, "modver.xml"))
+
+    End Function
+
     Public Function rootPath() As String
 
         Console.Write("Locating Web server...")

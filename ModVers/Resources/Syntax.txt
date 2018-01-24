@@ -1,0 +1,14 @@
+Modvers Client.
+
+
+MODEVERS /id [Customer ID] {/w}
+		 /?
+
+-id
+	An identifier used in loading to Priority
+
+-w {Optional}
+	Wait for user input on completion
+
+-?
+	This helpfile.
